@@ -1,5 +1,6 @@
 from google import genai
 from google.genai import types
+from pathlib import Path
 import json
 import time
 import os
@@ -26,8 +27,17 @@ VOICE_ARCHETYPES = [
 # 5. Neutral, professional, clear, british voice -> voice ID: NmpxQl3ZUbfh8HgoNCGM
 # 6. Loud, energetic, young, british male voice -> voice ID: 2mltbVQP21Fq8XgIfRQJ
 
-def extract_characters(book_text):
-    sample_text = book_text[:30000]  # Use the first 30,000 characters as a sample
+def extract_characters(book_filename, book_text):
+
+    base_dir = Path(__file__).resolve().parent.parent
+    cache_path = base_dir / "data" / "character_cache" / f"{book_filename}.json"
+
+    if cache_path.exists():
+        print(f"DEBUG: Cache found for {book_filename}, Loading from disk...")
+        with open(cache_path, "r") as f:
+            return json.load(f)
+
+    sample_text = book_text[:15000]  # Use the first 30,000 characters as a sample
     
     prompt_text = f"""
     Analyze the following text from a book.
@@ -122,6 +132,11 @@ def extract_characters(book_text):
                 time.sleep(wait_time)
                 continue
             else:
+                # Save to cache
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(cache_path, "w") as f:
+                    json.dump(result_json, f, indent=2)
+
                 return result_json
 
         except Exception as e:

@@ -30,7 +30,7 @@ def get_book_characters(book_filename: str):
         raise HTTPException(status_code=404, detail="Book not found")
     
     # Call our Gemini Service
-    character_list = extract_characters(text)
+    character_list = extract_characters(book_filename, text)
     return character_list
 
 if __name__ == "__main__":
