@@ -1,8 +1,17 @@
 from fastapi import FastAPI, HTTPException
 from services.gemini_service import extract_characters
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Helper function to load books text from data folder
 def load_book_text(book_filename):

@@ -82,7 +82,7 @@ def extract_characters(book_filename, book_text):
         try:
             print(f"DEBUG: Attempt {attempt + 1} of {max_retries}...")
             response = client.models.generate_content(
-                model="gemini-2.0-flash",
+                model="gemini-2.5-flash",
                 contents=prompt_text,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",

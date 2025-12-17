@@ -13,6 +13,12 @@ async function loadCharacters(filename) {
         const res = await fetch(`${API_URL}/books/${filename}/characters`);
         const data = await res.json();
 
+        console.log("Character data received:", data);
+
+        if (!data.characters || !Array.isArray(data.characters)) {
+            throw new Error("Invalid Data: 'characters' list is missing!");
+        }
+
         loading.classList.add('hidden');
         title.innerText = `Cast of ${data.book_title || "the Book"}`;
 
