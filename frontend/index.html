@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fourth Wall Audio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="brand">
+                <h1>Fourth Wall</h1>
+                <p>Interactive Audiobooks</p>
+            </div>
+            
+            <div class="book-list">
+                <p class="label">LIBRARY</p>
+                <button class="book-btn" onclick="loadCharacters('pride_and_prejudice.txt')">
+                    Pride and Prejudice
+                </button>
+                <button class="book-btn" onclick="loadCharacters('merchant_of_venice.txt')">
+                    The Merchant of Venice
+                </button>
+                <button class="book-btn" onclick="loadCharacters('wuthering_heights.txt')">
+                    Wuthering Heights
+                </button>
+            </div>
+        </aside>
+
+        <main class="stage">
+            <header>
+                <h2 id="stage-title">Select a book to cast the characters...</h2>
+            </header>
+
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p>Gemini is reading the book and casting roles...</p>
+            </div>
+
+            <div id="character-grid" class="grid"></div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

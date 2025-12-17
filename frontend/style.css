@@ -1,0 +1,48 @@
+:root {
+    --bg-dark: #0f0f0f;
+    --bg-sidebar: #1a1a1a;
+    --card-bg: #252525;
+    --accent: #D65A31; /* A nice burnt orange/red for drama */
+    --text: #ffffff;
+}
+
+body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text); height: 100vh; overflow: hidden; }
+
+.container { display: flex; height: 100%; }
+
+/* Sidebar */
+.sidebar { width: 260px; background: var(--bg-sidebar); padding: 2rem; border-right: 1px solid #333; display: flex; flex-direction: column; }
+.brand h1 { margin: 0; font-size: 1.5rem; letter-spacing: -1px; }
+.brand p { color: #666; font-size: 0.8rem; margin-top: 5px; }
+.book-list { margin-top: 3rem; }
+.label { color: #555; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 1rem; }
+
+.book-btn {
+    width: 100%; padding: 12px; margin-bottom: 8px;
+    background: transparent; border: 1px solid transparent;
+    color: #aaa; text-align: left; cursor: pointer; border-radius: 8px;
+    font-size: 0.9rem; transition: all 0.2s;
+}
+.book-btn:hover { background: #333; color: white; }
+
+/* Stage */
+.stage { flex: 1; padding: 3rem; overflow-y: auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+
+/* Cards */
+.card { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid #333; transition: transform 0.2s; }
+.card:hover { transform: translateY(-4px); border-color: #555; }
+.card h3 { margin: 0 0 10px 0; color: white; }
+.card p { color: #bbb; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem; }
+.meta { font-size: 0.75rem; color: #666; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.chat-btn {
+    width: 100%; padding: 10px; background: white; color: black;
+    border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+}
+.chat-btn:hover { background: #ddd; }
+
+/* Utilities */
+.hidden { display: none; }
+.spinner { width: 30px; height: 30px; border: 3px solid #333; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s infinite; margin: 0 auto 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }

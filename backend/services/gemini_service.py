@@ -72,7 +72,7 @@ def extract_characters(book_text):
         try:
             print(f"DEBUG: Attempt {attempt + 1} of {max_retries}...")
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.0-flash",
                 contents=prompt_text,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
@@ -117,7 +117,9 @@ def extract_characters(book_text):
             if not result_json.get("characters"):
                 attempt += 1
                 print(f"Error: No characters found in the response. Attempting Retry...")
-                time.sleep(2)  # brief pause before retrying
+                wait_time = 2 * (2 ** (attempt - 1))  # Exponential backoff
+                print(f"Waiting for {wait_time} seconds before retrying...")
+                time.sleep(wait_time)
                 continue
             else:
                 return result_json
