@@ -5,6 +5,7 @@ const AGENT_ID = "agent_0801kcqmscywerh8vppp1zya3zdq";
 
 window.loadCharacters = loadCharacters
 window.startChat = startChat
+window.endChat = endChat;
 
 let conversation = null;
 
@@ -37,6 +38,7 @@ async function loadCharacters(filename) {
             const safePrompt = encodeURIComponent(char.system_prompt);
             
             card.innerHTML = `
+                <button class="close-btn" onclick="window.endChat()">×</button>
                 <div class="meta">Voice: ${char.assigned_voice_id}</div>
                 <h3>${char.name}</h3>
                 <p>${char.description}</p>
@@ -158,5 +160,24 @@ async function startChat(btnElement, voiceId, encodedPrompt, charName) {
         btn.innerText = "Connection Failed";
         alert("Check console for errors. (Did you set the Agent ID?)");
         btn.disabled = false;
+    }
+}
+
+async function endChat() {
+    if (conversation) {
+        console.log("X Button clicked. Ending session...");
+        await conversation.endSession();
+        // No need to remove classes here manually!
+        // The 'onDisconnect' listener in startChat will catch this 
+        // and do the UI cleanup for us.
+    } else {
+        // Fallback: If stuck on "Connecting..." and conversation is null, force close UI
+        document.body.classList.remove('chat-active');
+        document.querySelectorAll('.card.active').forEach(c => c.classList.remove('active', 'speaking'));
+        // Re-enable buttons if needed (optional reset logic)
+        document.querySelectorAll('.chat-btn').forEach(b => {
+            b.disabled = false; 
+            b.innerText = b.innerText.replace("Connecting...", "Talk to");
+        });
     }
 }

@@ -105,3 +105,28 @@ body.chat-active .card:not(.active) {
     animation: pulse-red 2s infinite;
     border-color: #ff4444;
 }
+
+/* The "X" Button */
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #888;
+    cursor: pointer;
+    line-height: 1;
+    z-index: 100; /* Ensure it sits on top */
+    display: none; /* Hidden by default */
+    transition: color 0.2s;
+}
+
+/* Only show it when the card is Active (Expanded) */
+.card.active .close-btn {
+    display: block;
+}
+
+.close-btn:hover {
+    color: #ff4444; /* Red on hover */
+}
