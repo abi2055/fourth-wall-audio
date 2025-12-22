@@ -40,6 +40,7 @@ async function loadCharacters(filename) {
                 <div class="meta">Voice: ${char.assigned_voice_id}</div>
                 <h3>${char.name}</h3>
                 <p>${char.description}</p>
+                <div class="transcript" id="transcript-${char.assigned_voice_id}"></div>
                 <button class="chat-btn" onclick="window.startChat(this, '${char.assigned_voice_id}', '${safePrompt}', '${char.name}')">
                     Talk to ${char.name}
                 </button>
@@ -63,14 +64,23 @@ function openElevenLabs(voiceId, encodedPrompt) {
 }
 
 async function startChat(btnElement, voiceId, encodedPrompt, charName) {
-    const systemPrompt = decodeURIComponent(encodedPrompt);
+    let systemPrompt = decodeURIComponent(encodedPrompt);
+    systemPrompt += " INSTRUCTION: Keep your responses conversational, brief, and under 3 sentences. Do not monologue.";
     const btn = btnElement; 
+    const card = btn.closest('.card'); // Find the parent card
+    const transcriptBox = card.querySelector('.transcript');
     const originalText = `Talk to ${charName}`;
 
     if (conversation) {
         btn.innerText = "Disconnecting...";
         await conversation.endSession();
         conversation = null;
+
+        document.body.classList.remove('chat-active');
+        card.classList.remove('active', 'speaking');
+        btn.innerText = originalText;
+        btn.style.backgroundColor = "";
+        btn.style.color = "";
         return;
     }
 
@@ -83,35 +93,41 @@ async function startChat(btnElement, voiceId, encodedPrompt, charName) {
 
         btn.innerText = "Connecting...";
 
+        // UI: Enter Focus Mode
+        document.body.classList.add('chat-active');
+        card.classList.add('active');
+        transcriptBox.innerHTML = `<div class="msg ai">System: Connected to ${charName}</div>`;
+
         console.log(`Starting conversation with ${charName}, Voice ID: ${voiceId}`);
         console.log("System Prompt:", systemPrompt);
         conversation = await Conversation.startSession({
             agentId: AGENT_ID,
             overrides: {
                 tts: { 
-                    voiceId: voiceId // We force the agent to use the Gemini-selected voice
+                    voiceId: "2mltbVQP21Fq8XgIfRQJ" // We force the agent to use the Gemini-selected voice
                 },
                 agent: { 
                     prompt: { 
                         prompt: systemPrompt // We force the agent to become the character
                     },
-                    firstMessage: `(In character) I am listening` 
+                    firstMessage: `I am listening` 
                 }
             },
             onConnect: () => {
                 // Connection successful!
-                btn.innerText = `Listening to ${charName}... (Click to Stop)`;
+                btn.innerText = `End Conversation With ${charName}`;
                 btn.disabled = false;
-                btn.style.backgroundColor = "#d63031"; // Red
+                btn.style.backgroundColor = "#444"; 
                 btn.style.color = "white";
             },
             onDisconnect: () => {
-                console.log("Disconnected.");
-                btn.innerText = originalText; 
+                conversation = null;
+                document.body.classList.remove('chat-active');
+                card.classList.remove('active', 'speaking');
+                btn.innerText = originalText;
                 btn.disabled = false;
                 btn.style.backgroundColor = ""; 
                 btn.style.color = "";
-                conversation = null; 
             },
             onError: (err) => {
                 console.error("Conversation Error:", err);
@@ -121,10 +137,19 @@ async function startChat(btnElement, voiceId, encodedPrompt, charName) {
             onModeChange: (mode) => {
                 // Optional: You can see if the AI is 'speaking' or 'listening'
                 if (mode.mode === 'speaking') {
-                    btn.innerText = `${charName} is speaking...`;
+                    card.classList.add('speaking'); // Trigger Pulse CSS
                 } else {
-                    btn.innerText = `Listening to ${charName}...`;
+                    card.classList.remove('speaking');
                 }
+            },
+            onMessage: (message) => {
+                // Determine if it's user or AI
+                const source = message.source === 'user' ? 'user' : 'ai';
+                const div = document.createElement('div');
+                div.className = `msg ${source}`;
+                div.innerText = message.message;
+                transcriptBox.appendChild(div);
+                transcriptBox.scrollTop = transcriptBox.scrollHeight; // Auto-scroll
             }
         });
 
