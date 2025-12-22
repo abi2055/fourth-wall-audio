@@ -37,21 +37,24 @@ def extract_characters(book_filename, book_text):
         with open(cache_path, "r") as f:
             return json.load(f)
 
-    sample_text = book_text[:15000]  # Use the first 30,000 characters as a sample
+    sample_text = book_text[:30000]  # Use the first 30,000 characters as a sample
     
     prompt_text = f"""
     Analyze the following text from a book.
     
     CRITICAL INSTRUCTION:
     The provided text may contain a Title Page, Preface, Introduction, or Copyright notices. 
-    COMPLETELY IGNORE these sections. Do NOT list the author (e.g., Jane Austen), editors, or critics as characters.
+    COMPLETELY IGNORE these sections. Do NOT list the author (e.g., Jane Austen), editors, or critics.
     
-    Only extract **fictional characters** who actually appear, speak, or are described in the **story itself**.
+    Only extract **fictional characters** who act as MAJOR or KEY SUPPORTING roles in the **story itself**.
     
+    SELECTION RULES (STRICT):
+    1. **Proper Names Only:** Characters MUST have a proper name (e.g., "Elizabeth Bennet"). Do NOT include generic descriptions like "The Boy", "The Servant", "A Soldier", or "Boy with pitchfork".
+    2. **Significance:** The character must have dialogue or drive the plot. Exclude background "extras" or named characters who only appear once.
+    3. **Limit:** Identify the top 4-8 most significant characters found in this text chunk.
+
     Task:
-    Identify the 3-4 most important fictional characters in the narrative section of this text.
-    
-    For each character:
+    For each selected character:
     1. Write a 'system_prompt' that defines their personality, speech style, and hidden motivations.
     2. Assign them the BEST matching 'voice_id' from the list of Available Voices below.
     
@@ -75,10 +78,10 @@ def extract_characters(book_filename, book_text):
     {sample_text}
     """
 
-    max_retries = 4
+    max_retries = 5
     attempt = 0
 
-    while attempt < max_retries:
+    while attempt < max_retries - 1:
         try:
             print(f"DEBUG: Attempt {attempt + 1} of {max_retries}...")
             response = client.models.generate_content(
