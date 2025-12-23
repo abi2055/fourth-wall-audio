@@ -5,10 +5,13 @@ import json
 import time
 import os
 from dotenv import load_dotenv
+from google.cloud import firestore
 
 load_dotenv(override=True)
 
 client = genai.Client()
+
+db = firestore.Client(project=os.getenv("GOOGLE_CLOUD_PROJECT"))
 
 # Define your "Troupe" of available ElevenLabs Voice IDs
 VOICE_ARCHETYPES = [
@@ -27,15 +30,28 @@ VOICE_ARCHETYPES = [
 # 5. Neutral, professional, clear, british voice -> voice ID: NmpxQl3ZUbfh8HgoNCGM
 # 6. Loud, energetic, young, british male voice -> voice ID: 2mltbVQP21Fq8XgIfRQJ
 
+def save_book_to_db(book_title, characters_data, book_text):
+    doc_ref = db.collection("books").document(book_title)
+    doc_ref.set({
+        "book_title": book_title,
+        "characters": characters_data,
+        "book_text": book_text
+    })
+    print(f"Book '{book_title}' saved to Firestore.")
+
 def extract_characters(book_filename, book_text):
 
-    base_dir = Path(__file__).resolve().parent.parent
-    cache_path = base_dir / "data" / "character_cache" / f"{book_filename}.json"
+    base_book_title = os.path.splitext(book_filename)[0]
 
-    if cache_path.exists():
-        print(f"DEBUG: Cache found for {book_filename}, Loading from disk...")
-        with open(cache_path, "r") as f:
-            return json.load(f)
+    # checking cloud
+    doc_ref = db.collection("books").document(base_book_title)
+    doc = doc_ref.get()
+
+    if doc.exists:
+        data = doc.to_dict()
+        if data.get("characters"):
+            print(f"Found existing book '{base_book_title}' in Firestore. Returning cached characters.")
+            return {"book_title": base_book_title, "characters": data.get("characters")}
 
     sample_text = book_text[:30000]  # Use the first 30,000 characters as a sample
     
@@ -136,10 +152,7 @@ def extract_characters(book_filename, book_text):
                 continue
             else:
                 # Save to cache
-                cache_path.parent.mkdir(parents=True, exist_ok=True)
-                with open(cache_path, "w") as f:
-                    json.dump(result_json, f, indent=2)
-
+                save_book_to_db(book_title=base_book_title, characters_data=result_json.get("characters", []), book_text=book_text)
                 return result_json
 
         except Exception as e:
