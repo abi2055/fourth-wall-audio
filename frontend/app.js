@@ -1,13 +1,28 @@
 import { Conversation } from '@elevenlabs/client'
 
-const API_URL = "http://127.0.0.1:8000";
-const AGENT_ID = "agent_0801kcqmscywerh8vppp1zya3zdq";
+const API_URL = "http://127.0.0.1:5000";
+const AGENT_ID = "agent_9401kcq42qc0e4a8ys3pnty630rb";
 
 window.loadCharacters = loadCharacters
 window.startChat = startChat
 window.endChat = endChat;
 
 let conversation = null;
+
+function formatTitle(filename) {
+    if (!filename) return "Unknown Book";
+    
+    // 1. Remove file extension if present (e.g. .txt)
+    let clean = filename.replace(/\.txt$/i, '');
+    
+    // 2. Split by underscores OR hyphens
+    let words = clean.split(/[_-]/);
+    
+    // 3. Capitalize first letter of each word and join them
+    return words.map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
 
 async function loadCharacters(filename) {
     const grid = document.getElementById('character-grid');
@@ -19,7 +34,7 @@ async function loadCharacters(filename) {
     title.innerText = "Casting characters...";
 
     try {
-        const res = await fetch(`${API_URL}/books/${filename}/characters`);
+        const res = await fetch(`${API_URL}/book/${filename}`);
         const data = await res.json();
 
         console.log("Character data received:", data);
@@ -29,31 +44,47 @@ async function loadCharacters(filename) {
         }
 
         loading.classList.add('hidden');
-        title.innerText = `Cast of ${data.book_title || "the Book"}`;
+        const bookTitle = formatTitle(data.book_title || filename);
+        title.innerText = `Cast of ${bookTitle}`;
 
         data.characters.forEach(char => {
             const card = document.createElement('div');
             card.className = 'card';
 
-            const safePrompt = encodeURIComponent(char.system_prompt);
-            
+            // 1. Create the HTML *without* the complex onclick string
             card.innerHTML = `
-                <button class="close-btn" onclick="window.endChat()">×</button>
+                <button class="close-btn">×</button>
                 <div class="meta">Voice: ${char.assigned_voice_id}</div>
                 <h3>${char.name}</h3>
                 <p>${char.description}</p>
-                <div class="transcript" id="transcript-${char.assigned_voice_id}"></div>
-                <button class="chat-btn" onclick="window.startChat(this, '${char.assigned_voice_id}', '${safePrompt}', '${char.name}')">
-                    Talk to ${char.name}
-                </button>
+                <div class="transcript"></div>
+                <button class="chat-btn">Talk to ${char.name}</button>
             `;
+
+            // 2. Attach the "Talk" logic safely using JavaScript
+            // This method handles apostrophes, quotes, and newlines automatically.
+            const chatBtn = card.querySelector('.chat-btn');
+            
+            chatBtn.addEventListener('click', () => {
+                // We pass the raw data directly. No encoding needed here!
+                window.startChat(
+                    chatBtn, 
+                    char.assigned_voice_id, 
+                    encodeURIComponent(char.system_prompt), 
+                    encodeURIComponent(char.name)
+                );
+            });
+
+            // 3. Attach the "Close" logic
+            card.querySelector('.close-btn').addEventListener('click', window.endChat);
+
             grid.appendChild(card);
         });
 
     } catch (err) {
         console.error(err);
         loading.classList.add('hidden');
-        title.innerText = "Error loading characters. Is the backend running?";
+        title.innerText = "Internal Error: Could not load characters.";
     }
 }
 
@@ -65,26 +96,35 @@ function openElevenLabs(voiceId, encodedPrompt) {
     alert("Next Step: This button will trigger the ElevenLabs widget!\n\nVoice ID: " + voiceId);
 }
 
-async function startChat(btnElement, voiceId, encodedPrompt, charName) {
+async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
     let systemPrompt = decodeURIComponent(encodedPrompt);
+    let charName = decodeURIComponent(encodedName);
     systemPrompt += " INSTRUCTION: Keep your responses conversational, brief, and under 3 sentences. Do not monologue.";
-    const btn = btnElement; 
-    const card = btn.closest('.card'); // Find the parent card
-    const transcriptBox = card.querySelector('.transcript');
     const originalText = `Talk to ${charName}`;
 
+    const btn = btnElement; 
+    const card = btn.closest('.card'); 
+
+    if (card.classList.contains('active')) {
+        console.log("User requested disconnect.");
+        if (conversation) {
+            btn.innerText = "Disconnecting...";
+            await conversation.endSession(); 
+            conversation = null;
+        }
+        // CRITICAL: We return here so we don't accidentally restart the chat below.
+        return; 
+    }
+
     if (conversation) {
-        btn.innerText = "Disconnecting...";
+        console.log("Switching characters... ending previous session.");
         await conversation.endSession();
         conversation = null;
-
-        document.body.classList.remove('chat-active');
-        card.classList.remove('active', 'speaking');
-        btn.innerText = originalText;
-        btn.style.backgroundColor = "";
-        btn.style.color = "";
-        return;
+        // The onDisconnect callback of the OLD session will handle the UI cleanup 
+        // for the old card automatically.
     }
+
+    const transcriptBox = card.querySelector('.transcript');
 
     btn.innerText = "Requesting Mic...";
     btn.disabled = true;
@@ -106,7 +146,7 @@ async function startChat(btnElement, voiceId, encodedPrompt, charName) {
             agentId: AGENT_ID,
             overrides: {
                 tts: { 
-                    voiceId: "2mltbVQP21Fq8XgIfRQJ" // We force the agent to use the Gemini-selected voice
+                    voiceId: voiceId // We force the agent to use the Gemini-selected voice
                 },
                 agent: { 
                     prompt: { 
@@ -145,11 +185,11 @@ async function startChat(btnElement, voiceId, encodedPrompt, charName) {
                 }
             },
             onMessage: (message) => {
-                // Determine if it's user or AI
                 const source = message.source === 'user' ? 'user' : 'ai';
                 const div = document.createElement('div');
                 div.className = `msg ${source}`;
-                div.innerText = message.message;
+                const cleanText = message.message.replace(/<[^>]*>/g, '').trim();
+                div.innerText = cleanText;
                 transcriptBox.appendChild(div);
                 transcriptBox.scrollTop = transcriptBox.scrollHeight; // Auto-scroll
             }
@@ -167,9 +207,6 @@ async function endChat() {
     if (conversation) {
         console.log("X Button clicked. Ending session...");
         await conversation.endSession();
-        // No need to remove classes here manually!
-        // The 'onDisconnect' listener in startChat will catch this 
-        // and do the UI cleanup for us.
     } else {
         // Fallback: If stuck on "Connecting..." and conversation is null, force close UI
         document.body.classList.remove('chat-active');

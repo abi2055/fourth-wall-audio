@@ -19,8 +19,12 @@ VOICE_ARCHETYPES = [
     {"id": "NmpxQl3ZUbfh8HgoNCGM", "type": "Male Voice 2", "desc": "Neutral, Professional, Clear, Male, British"},
     {"id": "6sFKzaJr574YWVu4UuJF", "type": "Male Voice 3", "desc": "Deep, Strong, Wise, Male, British"},
     {"id": "goT3UYdM9bhm0n2lmKQx", "type": "Male Voice 4", "desc": "Deep, Raspy, Dark, Low, Male, British"},
+    {"id": "2ajXGJNYBR0iNHpS4VZb", "type": "Male Voice 5", "desc": "Tough, gritty, Experienced, middle-aged, Male, British"},
     {"id": "rfkTsdZrVWEVhDycUYn9", "type": "Female Voice 1", "desc": "Witty, Sharp-tongued, Young, Female, British"},
-    {"id": "rCmVtv8cYU60uhlsOo1M", "type": "Female Voice 2", "desc": "Soft, British, Young, Warm, Female, British"}
+    {"id": "rCmVtv8cYU60uhlsOo1M", "type": "Female Voice 2", "desc": "Soft, British, Young, Warm, Female, British"},
+    {"id": "rWArYo7a2NWuBYf5BE4V", "type": "Female Voice 3", "desc": "Elegant, poised, calm, Female, British"},
+    {"id": "RILOU7YmBhvwJGDGjNmP", "type": "Female Voice 4", "desc": "Strong, old, commanding, mature, Female, British"},
+    {"id": "GsjQ0ydx7QzhDLqInGtT", "type": "Female Voice 5", "desc": "Suspensful, dark, steady, Female, British"}
 ]
 
 # 1. soft, british, young, female voice -> voice ID: rCmVtv8cYU60uhlsOo1M
@@ -29,6 +33,10 @@ VOICE_ARCHETYPES = [
 # 4. Old, wise, slow, shaky, european voice -> voice ID: 6sFKzaJr574YWVu4UuJF
 # 5. Neutral, professional, clear, british voice -> voice ID: NmpxQl3ZUbfh8HgoNCGM
 # 6. Loud, energetic, young, british male voice -> voice ID: 2mltbVQP21Fq8XgIfRQJ
+# 7. Elegant, poised, calm, british woman voice -> voice ID: rWArYo7a2NWuBYf5BE4V
+# 8. Tough, gritty, Experienced, middle-aged, british male voice -> voice ID: 2ajXGJNYBR0iNHpS4VZb
+# 9. Strong, old, commanding, mature, british woman voice -> voice ID: RILOU7YmBhvwJGDGjNmP
+# 10. Suspensful, dark, steady, british woman voice -> voice ID: GsjQ0ydx7QzhDLqInGtT
 
 def save_book_to_db(book_title, characters_data, book_text):
     doc_ref = db.collection("books").document(book_title)
