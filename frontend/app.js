@@ -238,7 +238,7 @@ async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
             overrides: {
                 tts: { 
                     voiceId: voiceId, // We force the agent to use the Gemini-selected voice
-                    modelId: 'eleven_turbo_v2'
+                    modelId: "eleven_turbo_v2"
                 },
                 agent: { 
                     prompt: { 

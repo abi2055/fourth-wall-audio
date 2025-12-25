@@ -15,16 +15,16 @@ db = firestore.Client(project=os.getenv("GOOGLE_CLOUD_PROJECT"))
 
 # Define your "Troupe" of available ElevenLabs Voice IDs
 VOICE_ARCHETYPES = [
-    {"id": "2mltbVQP21Fq8XgIfRQJ", "type": "Male Voice 1", "desc": "Young, Confident, Energetic, Male, British"}, 
-    {"id": "NmpxQl3ZUbfh8HgoNCGM", "type": "Male Voice 2", "desc": "Neutral, Professional, Clear, Male, British"},
-    {"id": "6sFKzaJr574YWVu4UuJF", "type": "Male Voice 3", "desc": "Deep, Strong, Wise, Male, British"},
-    {"id": "goT3UYdM9bhm0n2lmKQx", "type": "Male Voice 4", "desc": "Deep, Raspy, Dark, Low, Male, British"},
-    {"id": "2ajXGJNYBR0iNHpS4VZb", "type": "Male Voice 5", "desc": "Tough, gritty, Experienced, middle-aged, Male, British"},
-    {"id": "rfkTsdZrVWEVhDycUYn9", "type": "Female Voice 1", "desc": "Witty, Sharp-tongued, Young, Female, British"},
-    {"id": "rCmVtv8cYU60uhlsOo1M", "type": "Female Voice 2", "desc": "Soft, British, Young, Warm, Female, British"},
-    {"id": "rWArYo7a2NWuBYf5BE4V", "type": "Female Voice 3", "desc": "Elegant, poised, calm, Female, British"},
-    {"id": "RILOU7YmBhvwJGDGjNmP", "type": "Female Voice 4", "desc": "Strong, old, commanding, mature, Female, British"},
-    {"id": "GsjQ0ydx7QzhDLqInGtT", "type": "Female Voice 5", "desc": "Suspensful, dark, steady, Female, British"}
+    {"id": "2mltbVQP21Fq8XgIfRQJ", "type": "Axell (Young/Energetic)", "desc": "Young, Confident, Energetic, Male, British"}, 
+    {"id": "NmpxQl3ZUbfh8HgoNCGM", "type": "William (Refined)", "desc": "Neutral, Professional, Clear, Male, British"},
+    {"id": "6sFKzaJr574YWVu4UuJF", "type": "Axell (Young/Energetic)", "desc": "Deep, Strong, Wise, Male, British"},
+    {"id": "goT3UYdM9bhm0n2lmKQx", "type": "Edward (Dark)", "desc": "Deep, Raspy, Dark, Low, Male, British"},
+    {"id": "2ajXGJNYBR0iNHpS4VZb", "type": "Rob (Tough)", "desc": "Tough, gritty, Experienced, middle-aged, Male, British"},
+    {"id": "rfkTsdZrVWEVhDycUYn9", "type": "Shelby (Witty)", "desc": "Witty, Sharp-tongued, Young, Female, British"},
+    {"id": "rCmVtv8cYU60uhlsOo1M", "type": "Ana (Young/Soft)", "desc": "Soft, British, Young, Warm, Female, British"},
+    {"id": "rWArYo7a2NWuBYf5BE4V", "type": "Annabel (Elegant)", "desc": "Elegant, poised, calm, Female, British"},
+    {"id": "RILOU7YmBhvwJGDGjNmP", "type": "Jane (Mature)", "desc": "Strong, old, commanding, mature, Female, British"},
+    {"id": "GsjQ0ydx7QzhDLqInGtT", "type": "Olivia (Suspenseful)", "desc": "Suspensful, dark, steady, Female, British"}
 ]
 
 # 1. soft, british, young, female voice -> voice ID: rCmVtv8cYU60uhlsOo1M
