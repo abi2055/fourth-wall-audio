@@ -6,14 +6,143 @@ const AGENT_ID = "agent_9401kcq42qc0e4a8ys3pnty630rb";
 window.loadCharacters = loadCharacters
 window.startChat = startChat
 window.endChat = endChat;
+window.handleUpload = handleUpload;
 
 let conversation = null;
+
+const urlparams = new URLSearchParams(window.location.search);
+const tokenFromUrl = urlparams.get('access');
+
+if (tokenFromUrl) {
+    localStorage.setItem('fourth_wall_token', tokenFromUrl);
+    window.history.replaceState({}, document.title, "/");
+}
+
+const AUTH_TOKEN = localStorage.getItem('fourth_wall_token');
+
+if (!AUTH_TOKEN) {
+    console.warn("No Auth Token found. API calls might fail.");
+}
+
+async function handleUpload(inputElement) {
+    const file = inputElement.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert("File too large! Please upload a file smaller than 5MB.");
+        return;
+    }
+
+    const loading = document.getElementById('loading');
+    const title = document.getElementById('stage-title');
+    const grid = document.getElementById('character-grid');
+
+    grid.innerHTML = '';
+    loading.classList.remove('hidden');
+    title.innerText = "Uploading book...";
+
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        const headers = {}
+        if (AUTH_TOKEN) {
+            headers['X-Access-Token'] = AUTH_TOKEN; // <--- Send the key!
+        }
+
+        const res = await fetch(`${API_URL}/upload`, {
+            method: 'POST',
+            body: formData,
+            headers: headers
+        });
+        
+        if (!res.ok) {
+            const err = await res.text();
+            throw new Error(`Upload failed: ${err}`);
+        }
+        
+        const data = await res.json();
+        console.log("Upload response:", data);
+
+        renderCharacterCards(data);
+        addToSidebar(data.book_title);
+
+    } catch (err) {
+        console.error(err);
+        loading.classList.add('hidden');
+        title.innerText = "Internal Error: Could not upload book.";
+    } finally {
+        inputElement.value = ''; // Reset file input
+    }
+}
+
+function addToSidebar(bookId) {
+    const list = document.getElementById('book-list');
+    const existing = Array.from(list.children).find(btn => btn.innerText === formatTitle(bookId));
+    if (existing) return;
+    const btn = document.createElement('button');
+    btn.className = 'book-btn';
+    btn.innerText = formatTitle(bookId);
+    btn.onclick = () => loadCharacters(bookId);
+    if (list.children.length > 1) {
+        list.insertBefore(btn, list.children[1]);
+    } else {
+        list.appendChild(btn);
+    }
+}
+
+function renderCharacterCards(data) {
+    const grid = document.getElementById('character-grid');
+    const loading = document.getElementById('loading');
+    const title = document.getElementById('stage-title');
+
+    loading.classList.add('hidden');
+    const bookTitle = formatTitle(data.book_title);
+    title.innerText = `Cast of ${bookTitle}`;
+
+    data.characters.forEach(char => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        // 1. Create the HTML *without* the complex onclick string
+        card.innerHTML = `
+            <button class="close-btn">×</button>
+            <div class="meta">Voice: ${char.assigned_voice_id}</div>
+            <h3>${char.name}</h3>
+            <p>${char.description}</p>
+            <div class="transcript"></div>
+            <button class="chat-btn">Talk to ${char.name}</button>
+        `;
+
+        // 2. Attach the "Talk" logic safely using JavaScript
+        // This method handles apostrophes, quotes, and newlines automatically.
+        const chatBtn = card.querySelector('.chat-btn');
+            
+        chatBtn.addEventListener('click', () => {
+            // We pass the raw data directly. No encoding needed here!
+            window.startChat(
+                chatBtn, 
+                char.assigned_voice_id, 
+                encodeURIComponent(char.system_prompt), 
+                encodeURIComponent(char.name)
+            );
+        });
+
+        // 3. Attach the "Close" logic
+        card.querySelector('.close-btn').addEventListener('click', window.endChat);
+
+        grid.appendChild(card);
+    });
+}
 
 function formatTitle(filename) {
     if (!filename) return "Unknown Book";
     
     // 1. Remove file extension if present (e.g. .txt)
     let clean = filename.replace(/\.txt$/i, '');
+
+    // Remove timestamp if present (e.g. gatsby_173515...)
+    clean = clean.replace(/_\d+$/, '');
     
     // 2. Split by underscores OR hyphens
     let words = clean.split(/[_-]/);
@@ -34,53 +163,15 @@ async function loadCharacters(filename) {
     title.innerText = "Casting characters...";
 
     try {
-        const res = await fetch(`${API_URL}/book/${filename}`);
-        const data = await res.json();
-
-        console.log("Character data received:", data);
-
-        if (!data.characters || !Array.isArray(data.characters)) {
-            throw new Error("Invalid Data: 'characters' list is missing!");
+        const headers = {}
+        if (AUTH_TOKEN) {
+            headers['X-Access-Token'] = AUTH_TOKEN; // <--- Send the key!
         }
 
-        loading.classList.add('hidden');
-        const bookTitle = formatTitle(data.book_title || filename);
-        title.innerText = `Cast of ${bookTitle}`;
-
-        data.characters.forEach(char => {
-            const card = document.createElement('div');
-            card.className = 'card';
-
-            // 1. Create the HTML *without* the complex onclick string
-            card.innerHTML = `
-                <button class="close-btn">×</button>
-                <div class="meta">Voice: ${char.assigned_voice_id}</div>
-                <h3>${char.name}</h3>
-                <p>${char.description}</p>
-                <div class="transcript"></div>
-                <button class="chat-btn">Talk to ${char.name}</button>
-            `;
-
-            // 2. Attach the "Talk" logic safely using JavaScript
-            // This method handles apostrophes, quotes, and newlines automatically.
-            const chatBtn = card.querySelector('.chat-btn');
-            
-            chatBtn.addEventListener('click', () => {
-                // We pass the raw data directly. No encoding needed here!
-                window.startChat(
-                    chatBtn, 
-                    char.assigned_voice_id, 
-                    encodeURIComponent(char.system_prompt), 
-                    encodeURIComponent(char.name)
-                );
-            });
-
-            // 3. Attach the "Close" logic
-            card.querySelector('.close-btn').addEventListener('click', window.endChat);
-
-            grid.appendChild(card);
-        });
-
+        const res = await fetch(`${API_URL}/book/${filename}`, { headers: headers });
+        const data = await res.json();
+        console.log("Character data:", data);
+        renderCharacterCards(data);   
     } catch (err) {
         console.error(err);
         loading.classList.add('hidden');
@@ -88,13 +179,13 @@ async function loadCharacters(filename) {
     }
 }
 
-function openElevenLabs(voiceId, encodedPrompt) {
-    const systemPrompt = decodeURIComponent(encodedPrompt);
-    console.log("Opening chat with:", voiceId);
-    console.log("Prompt:", systemPrompt);
+// function openElevenLabs(voiceId, encodedPrompt) {
+//     const systemPrompt = decodeURIComponent(encodedPrompt);
+//     console.log("Opening chat with:", voiceId);
+//     console.log("Prompt:", systemPrompt);
     
-    alert("Next Step: This button will trigger the ElevenLabs widget!\n\nVoice ID: " + voiceId);
-}
+//     alert("Next Step: This button will trigger the ElevenLabs widget!\n\nVoice ID: " + voiceId);
+// }
 
 async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
     let systemPrompt = decodeURIComponent(encodedPrompt);
@@ -146,7 +237,8 @@ async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
             agentId: AGENT_ID,
             overrides: {
                 tts: { 
-                    voiceId: voiceId // We force the agent to use the Gemini-selected voice
+                    voiceId: voiceId, // We force the agent to use the Gemini-selected voice
+                    modelId: 'eleven_turbo_v2'
                 },
                 agent: { 
                     prompt: { 

@@ -2,13 +2,35 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from google.cloud import firestore
 import os
+from functools import wraps
+from flask import request
+from backend.services.gemini_service import extract_characters
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {
+    "origins": ["http://127.0.0.1:5500", "http://localhost:5500"],  # Allow your frontend
+    "allow_headers": ["Content-Type", "Authorization", "X-Access-Token"], # Allow your custom token
+    "methods": ["GET", "POST", "OPTIONS"] # Allow these actions
+}})
 
 db = firestore.Client(os.getenv('GOOGLE_CLOUD_PROJECT'))
+ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "default_insecure_password")
+print(f" DEBUG: Server is expecting this token: '{ACCESS_TOKEN}'")
+
+def require_token(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get('X-Access-Token')
+        if not token or token != ACCESS_TOKEN:
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/book/<book_id>', methods=['GET'])
+@require_token
 def get_book(book_id):
     print(f"Fetching book with ID: {book_id}")
     doc_ref = db.collection('books').document(book_id)
@@ -18,6 +40,32 @@ def get_book(book_id):
         return jsonify({"error": "Book not found"}), 404
 
     return jsonify(doc.to_dict())
+
+@app.route('/upload', methods=['POST'])
+@require_token # If using magic link
+def upload_book():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    # Sanitize and Unique-ify the filename
+    original_id = os.path.splitext(file.filename)[0]
+    # Append minimal timestamp to prevent overwrites
+    import time
+    book_id = f"{original_id}_{int(time.time())}"
+    
+    content = file.read().decode('utf-8')
+    
+    # Process
+    result = extract_characters(book_id, content)
+    
+    # Ensure the ID is in the response so frontend can add it to sidebar
+    result['book_title'] = book_id 
+    
+    return jsonify(result)
 
 if __name__ == '__main__':
     print("Starting Flask server...")

@@ -25,8 +25,16 @@
                 <h1>Fourth Wall</h1>
                 <p>Interactive Audiobooks</p>
             </div>
+
+            <div class="upload-section">
+                <p class="label">ADD YOUR OWN</p>
+                <label for="file-upload" class="upload-btn">
+                    Upload Book (.txt)
+                </label>
+                <input type="file" id="file-upload" accept=".txt" style="display: none;" onchange="handleUpload(this)">
+            </div>
             
-            <div class="book-list">
+            <div class="book-list" id="book-list">
                 <p class="label">LIBRARY</p>
                 <button class="book-btn" onclick="loadCharacters('pride_and_prejudice')">
                     Pride and Prejudice
