@@ -2,7 +2,8 @@
     --bg-dark: #0f0f0f;
     --bg-sidebar: #1a1a1a;
     --card-bg: #252525;
-    --accent: #D65A31; /* A nice burnt orange/red for drama */
+    --accent: #D65A31; /* User/Mic Color (Orange/Red) */
+    --ai-accent: #00d2ff; /* AI Voice Color (Cyan) */
     --text: #ffffff;
 }
 
@@ -24,7 +25,11 @@ body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-dark); 
 }
 .brand h1 { margin: 0; font-size: 1.5rem; letter-spacing: -1px; }
 .brand p { color: #666; font-size: 0.8rem; margin-top: 5px; }
-.book-list { margin-top: 3rem; }
+.book-list { 
+    margin-top: 2rem; /* Spacing from brand */
+    flex: 1; /* Allow this to grow if needed, but mostly lets the bottom push down */
+    overflow-y: auto; /* Scroll if library gets huge */
+}
 .label { color: #555; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 1rem; }
 
 .book-btn {
@@ -39,17 +44,17 @@ body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-dark); 
 .stage { flex: 1; padding: 3rem; overflow-y: auto; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
 
-/* Cards */
-.card { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid #333; transition: transform 0.2s; }
+.card { 
+    background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid #333;
+    /* CRITICAL: fast shadow transition for the audio visualizer */
+    transition: transform 0.2s, box-shadow 0.05s linear, border-color 0.2s;
+}
 .card:hover { transform: translateY(-4px); border-color: #555; }
 .card h3 { margin: 0 0 10px 0; color: white; }
 .card p { color: #bbb; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem; }
 .meta { font-size: 0.75rem; color: #666; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
-.chat-btn {
-    width: 100%; padding: 10px; background: white; color: black;
-    border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
-}
+.chat-btn { width: 100%; padding: 10px; background: white; color: black; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
 .chat-btn:hover { background: #ddd; }
 
 /* Utilities */
@@ -101,19 +106,21 @@ body.chat-active .card:not(.active) {
 }
 
 .msg { margin-bottom: 8px; padding: 5px 10px; border-radius: 5px; }
-.msg.user { background: #333; color: #ccc; text-align: right; }
-.msg.ai { background: #4a1919; color: #fff; text-align: left; }
+.msg.user { color: #ccc; text-align: right; border-right: 2px solid var(--accent); }
+.msg.ai { color: var(--ai-accent); text-align: left; border-left: 2px solid var(--ai-accent); }
 
 /* --- SPEAKING ANIMATION --- */
-@keyframes pulse-red {
-    0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
-    70% { box-shadow: 0 0 0 20px rgba(255, 68, 68, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+@keyframes pulse-blue {
+    0% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.7); border-color: var(--ai-accent); }
+    70% { box-shadow: 0 0 0 20px rgba(0, 210, 255, 0); border-color: var(--ai-accent); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); border-color: var(--accent); }
 }
 
 .card.speaking {
-    animation: pulse-red 2s infinite;
-    border-color: #ff4444;
+    animation: pulse-blue 1.5s infinite;
+    /* We use !important to override the JS visualizer shadow if they overlap */
+    box-shadow: 0 0 30px var(--ai-accent) !important;
+    border-color: var(--ai-accent) !important;
 }
 
 /* The "X" Button */
@@ -142,10 +149,12 @@ body.chat-active .card:not(.active) {
 }
 
 .upload-section {
+    margin-top: auto; /* This magic line pushes it to the bottom! */
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Consistent space between "ADD YOUR OWN" and the button */
-    margin-bottom: 40px; /* Push the Library down further */
+    gap: 12px; 
+    padding-top: 20px;
+    border-top: 1px solid #333; /* Nice separator line */
 }
 
 .upload-btn {

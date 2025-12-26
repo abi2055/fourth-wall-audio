@@ -10,6 +10,11 @@ window.handleUpload = handleUpload;
 
 let conversation = null;
 
+let audioContext = null;
+let analyser = null;
+let microphone = null;
+let visualizerFrame = null;
+
 const urlparams = new URLSearchParams(window.location.search);
 const tokenFromUrl = urlparams.get('access');
 
@@ -22,6 +27,71 @@ const AUTH_TOKEN = localStorage.getItem('fourth_wall_token');
 
 if (!AUTH_TOKEN) {
     console.warn("No Auth Token found. API calls might fail.");
+}
+
+function startVisualizer(stream, cardElement) {
+    // 1. Initialize Audio Context (only once)
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    // 2. Connect the Microphone
+    microphone = audioContext.createMediaStreamSource(stream);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256; // Low setting = faster performance
+    microphone.connect(analyser);
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    // 3. The Animation Loop (Runs 60x per second)
+    function animate() {
+        // Stop if card is closed
+        if (!cardElement.classList.contains('active')) return;
+
+        // If AI is speaking, let CSS animation take over (don't override with JS)
+        if (cardElement.classList.contains('speaking')) {
+            visualizerFrame = requestAnimationFrame(animate);
+            return;
+        }
+
+        analyser.getByteFrequencyData(dataArray);
+
+        // Calculate Average Volume
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+        }
+        const average = sum / dataArray.length;
+
+        console.log("Mic Volume:", average);
+
+        // 4. Map Volume to Glow
+        // Sensitivity: Multiply average by 2.5 to make it responsive
+        const intensity = Math.min(average * 4.0, 60); 
+         
+        if (intensity > 5) { // Threshold to ignore silence
+             // Red/Orange Glow (Matches your --accent color)
+             // box-shadow: h-offset v-offset blur spread color
+            cardElement.style.boxShadow = `0 0 ${20 + intensity}px ${5 + intensity * 0.5}px rgba(214, 90, 49, ${0.3 + (intensity/100)})`;
+            cardElement.style.borderColor = `rgba(214, 90, 49, ${0.5 + (intensity/100)})`;
+        } else {
+            // Idle State (Low red glow)
+            cardElement.style.boxShadow = `0 0 20px rgba(214, 90, 49, 0.1)`;
+            cardElement.style.borderColor = `#D65A31`; 
+        }
+
+        visualizerFrame = requestAnimationFrame(animate);
+    }
+
+    animate();
+}
+
+function stopVisualizer() {
+    if (visualizerFrame) cancelAnimationFrame(visualizerFrame);
+    // Note: We don't close audioContext so we can reuse it instantly
+    // but we do disconnect the mic to stop processing
+    if (microphone) microphone.disconnect();
+    if (analyser) analyser.disconnect();
 }
 
 async function fetchLibrary() {
@@ -250,7 +320,7 @@ async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
 
     try {
         // 1. Get Microphone Access
-        await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
         btn.innerText = "Connecting...";
 
@@ -258,6 +328,8 @@ async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
         document.body.classList.add('chat-active');
         card.classList.add('active');
         transcriptBox.innerHTML = `<div class="msg ai">System: Connected to ${charName}</div>`;
+
+        startVisualizer(stream, card);
 
         console.log(`Starting conversation with ${charName}, Voice ID: ${voiceId}`);
         console.log("System Prompt:", systemPrompt);
@@ -286,6 +358,10 @@ async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
                 conversation = null;
                 document.body.classList.remove('chat-active');
                 card.classList.remove('active', 'speaking');
+
+                card.style.boxShadow = "";   
+                card.style.borderColor = "";
+
                 btn.innerText = originalText;
                 btn.disabled = false;
                 btn.style.backgroundColor = ""; 
@@ -324,13 +400,18 @@ async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
 }
 
 async function endChat() {
+    stopVisualizer();
     if (conversation) {
         console.log("X Button clicked. Ending session...");
         await conversation.endSession();
     } else {
         // Fallback: If stuck on "Connecting..." and conversation is null, force close UI
         document.body.classList.remove('chat-active');
-        document.querySelectorAll('.card.active').forEach(c => c.classList.remove('active', 'speaking'));
+        document.querySelectorAll('.card.active').forEach(c => {
+            c.classList.remove('active', 'speaking')
+            c.style.boxShadow = "";
+            c.style.borderColor = "";
+        });
         // Re-enable buttons if needed (optional reset logic)
         document.querySelectorAll('.chat-btn').forEach(b => {
             b.disabled = false; 
