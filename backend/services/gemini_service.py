@@ -42,8 +42,8 @@ def save_book_to_db(book_title, characters_data, book_text):
     doc_ref = db.collection("books").document(book_title)
     doc_ref.set({
         "book_title": book_title,
-        "characters": characters_data,
-        "book_text": book_text
+        "characters": characters_data
+        # "book_text": book_text
     })
     print(f"Book '{book_title}' saved to Firestore.")
 

@@ -23,6 +23,8 @@ print(f" DEBUG: Server is expecting this token: '{ACCESS_TOKEN}'")
 def require_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        if request.method == 'OPTIONS':
+            return f(*args, **kwargs)
         token = request.headers.get('X-Access-Token')
         if not token or token != ACCESS_TOKEN:
             return jsonify({"error": "Unauthorized"}), 401
@@ -66,6 +68,22 @@ def upload_book():
     result['book_title'] = book_id 
     
     return jsonify(result)
+
+@app.route('/books', methods=['GET'])
+@require_token
+def list_books():
+    try:
+        # 1. Query Firestore for all documents in 'books'
+        books_ref = db.collection('books')
+        docs = books_ref.stream()
+        
+        # 2. Extract just the IDs (e.g., "pride_and_prejudice", "gatsby_1735...")
+        book_list = [doc.id for doc in docs]
+        
+        return jsonify(book_list)
+    except Exception as e:
+        print(f"Error fetching library: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     print("Starting Flask server...")

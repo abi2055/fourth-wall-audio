@@ -24,6 +24,40 @@ if (!AUTH_TOKEN) {
     console.warn("No Auth Token found. API calls might fail.");
 }
 
+async function fetchLibrary() {
+    const list = document.getElementById('book-list');
+    
+    // Small loading indicator
+    list.innerHTML += '<p class="small-note">Loading library...</p>';
+
+    try {
+        const headers = {};
+        if (AUTH_TOKEN) headers['X-Access-Token'] = AUTH_TOKEN;
+
+        const res = await fetch(`${API_URL}/books`, { headers });
+        
+        if (!res.ok) throw new Error("Failed to load library");
+        
+        const bookIds = await res.json();
+        
+        // Clear the list (keep the label) but remove old buttons/loading text
+        // We rebuild from scratch to ensure sync with DB
+        const label = list.querySelector('.label');
+        list.innerHTML = ''; 
+        if(label) list.appendChild(label);
+
+        // Sort alphabetically for niceness
+        bookIds.sort();
+
+        bookIds.forEach(id => {
+            addToSidebar(id);
+        });
+
+    } catch (err) {
+        console.error("Library Error:", err);
+    }
+}
+
 async function handleUpload(inputElement) {
     const file = inputElement.files[0];
     if (!file) return;
@@ -78,17 +112,19 @@ async function handleUpload(inputElement) {
 
 function addToSidebar(bookId) {
     const list = document.getElementById('book-list');
-    const existing = Array.from(list.children).find(btn => btn.innerText === formatTitle(bookId));
+    
+    // Check if button already exists (based on the visible text)
+    const prettyTitle = formatTitle(bookId);
+    const existing = Array.from(list.querySelectorAll('button')).find(btn => btn.innerText === prettyTitle);
+    
     if (existing) return;
+
     const btn = document.createElement('button');
     btn.className = 'book-btn';
-    btn.innerText = formatTitle(bookId);
+    btn.innerText = prettyTitle;
     btn.onclick = () => loadCharacters(bookId);
-    if (list.children.length > 1) {
-        list.insertBefore(btn, list.children[1]);
-    } else {
-        list.appendChild(btn);
-    }
+    
+    list.appendChild(btn);
 }
 
 function renderCharacterCards(data) {
@@ -178,14 +214,6 @@ async function loadCharacters(filename) {
         title.innerText = "Internal Error: Could not load characters.";
     }
 }
-
-// function openElevenLabs(voiceId, encodedPrompt) {
-//     const systemPrompt = decodeURIComponent(encodedPrompt);
-//     console.log("Opening chat with:", voiceId);
-//     console.log("Prompt:", systemPrompt);
-    
-//     alert("Next Step: This button will trigger the ElevenLabs widget!\n\nVoice ID: " + voiceId);
-// }
 
 async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
     let systemPrompt = decodeURIComponent(encodedPrompt);
@@ -309,4 +337,8 @@ async function endChat() {
             b.innerText = b.innerText.replace("Connecting...", "Talk to");
         });
     }
+}
+
+if (AUTH_TOKEN) {
+    fetchLibrary();
 }

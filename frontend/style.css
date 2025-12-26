@@ -11,7 +11,17 @@ body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-dark); 
 .container { display: flex; height: 100%; }
 
 /* Sidebar */
-.sidebar { width: 260px; background: var(--bg-sidebar); padding: 2rem; border-right: 1px solid #333; display: flex; flex-direction: column; }
+.sidebar {
+    width: 260px;
+    background-color: #211f1f;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px; 
+    border-right: 1px solid #333;
+    height: 100vh;
+    box-sizing: border-box; /* Ensures padding doesn't widen the bar */
+}
 .brand h1 { margin: 0; font-size: 1.5rem; letter-spacing: -1px; }
 .brand p { color: #666; font-size: 0.8rem; margin-top: 5px; }
 .book-list { margin-top: 3rem; }
@@ -131,23 +141,54 @@ body.chat-active .card:not(.active) {
     color: #ff4444; /* Red on hover */
 }
 
-/* style.css */
-.upload-btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background: #2a2a2a;
-    color: #fff;
-    text-align: center;
-    border: 1px dashed #666;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    margin-bottom: 8px;
-    transition: all 0.2s;
+.upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Consistent space between "ADD YOUR OWN" and the button */
+    margin-bottom: 40px; /* Push the Library down further */
 }
 
+.upload-btn {
+    /* Layout */
+    display: flex;           
+    justify-content: center; /* Horizontally center text */
+    align-items: center;     /* Vertically center text */
+    width: 100%;             /* Fill the sidebar width */
+    height: 48px;            /* Fixed height for consistency */
+    
+    /* Styling */
+    background: rgba(255, 255, 255, 0.03); /* Very subtle fill */
+    border: 1px dashed #555;
+    border-radius: 8px;
+    
+    /* Typography */
+    color: #aaa;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+/* Hover Effect - Makes it feel interactive */
 .upload-btn:hover {
-    background: #333;
+    background: rgba(255, 255, 255, 0.1);
     border-color: #fff;
+    color: #fff;
+    transform: translateY(-1px); /* Subtle lift */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.upload-btn:active {
+    transform: translateY(0);
+}
+
+.label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: #666;
+    text-transform: uppercase;
+    margin: 0; /* Let flex-gap handle the spacing */
+    padding-left: 4px; /* Slight alignment with the button border */
 }
