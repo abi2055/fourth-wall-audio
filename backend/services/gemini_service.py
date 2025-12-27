@@ -13,7 +13,6 @@ client = genai.Client()
 
 db = firestore.Client(project=os.getenv("GOOGLE_CLOUD_PROJECT"))
 
-# Define your "Troupe" of available ElevenLabs Voice IDs
 VOICE_ARCHETYPES = [
     {"id": "2mltbVQP21Fq8XgIfRQJ", "type": "Axell (Young/Energetic)", "desc": "Young, Confident, Energetic, Male, British"}, 
     {"id": "NmpxQl3ZUbfh8HgoNCGM", "type": "William (Refined)", "desc": "Neutral, Professional, Clear, Male, British"},
@@ -138,15 +137,14 @@ def extract_characters(book_filename, book_text):
             raw_text = response.text
             print(f"DEBUG LOG: Gemini Response Text: {raw_text}")
 
-            # 1. Handle Safety Blocks (If text is None)
+            # Handle Safety Blocks (If text is None)
             if not raw_text:
                 print("Error: Gemini returned empty text. Likely a Safety Filter trigger.")
                 return {"error": "Content blocked by safety filters"}
 
-            # 2. Clean Markdown (Remove ```json and ```)
+            # Clean Markdown (Remove ```json and ```)
             clean_text = raw_text.strip()
             if clean_text.startswith("```"):
-                # Remove first line (```json) and last line (```)
                 clean_text = "\n".join(clean_text.split("\n")[1:-1])
             
             result_json = json.loads(clean_text)

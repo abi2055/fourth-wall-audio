@@ -73,11 +73,11 @@ def upload_book():
 @require_token
 def list_books():
     try:
-        # 1. Query Firestore for all documents in 'books'
+        # Query Firestore for all documents in 'books'
         books_ref = db.collection('books')
         docs = books_ref.stream()
         
-        # 2. Extract just the IDs (e.g., "pride_and_prejudice", "gatsby_1735...")
+        # Extract just the IDs (e.g., "pride_and_prejudice", "gatsby_1735...")
         book_list = [doc.id for doc in docs]
         
         return jsonify(book_list)

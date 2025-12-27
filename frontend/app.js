@@ -30,12 +30,12 @@ if (!AUTH_TOKEN) {
 }
 
 function startVisualizer(stream, cardElement) {
-    // 1. Initialize Audio Context (only once)
+    // Initialize Audio Context (only once)
     if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
 
-    // 2. Connect the Microphone
+    // Connect the Microphone
     microphone = audioContext.createMediaStreamSource(stream);
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 256; // Low setting = faster performance
@@ -43,7 +43,7 @@ function startVisualizer(stream, cardElement) {
 
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-    // 3. The Animation Loop (Runs 60x per second)
+    // The Animation Loop (Runs 60x per second)
     function animate() {
         // Stop if card is closed
         if (!cardElement.classList.contains('active')) return;
@@ -65,12 +65,11 @@ function startVisualizer(stream, cardElement) {
 
         console.log("Mic Volume:", average);
 
-        // 4. Map Volume to Glow
-        // Sensitivity: Multiply average by 2.5 to make it responsive
+        // Map Volume to Glow
         const intensity = Math.min(average * 4.0, 60); 
          
         if (intensity > 5) { // Threshold to ignore silence
-             // Red/Orange Glow (Matches your --accent color)
+             // Red/Orange Glow 
              // box-shadow: h-offset v-offset blur spread color
             cardElement.style.boxShadow = `0 0 ${20 + intensity}px ${5 + intensity * 0.5}px rgba(214, 90, 49, ${0.3 + (intensity/100)})`;
             cardElement.style.borderColor = `rgba(214, 90, 49, ${0.5 + (intensity/100)})`;
@@ -210,7 +209,6 @@ function renderCharacterCards(data) {
         const card = document.createElement('div');
         card.className = 'card';
 
-        // 1. Create the HTML *without* the complex onclick string
         card.innerHTML = `
             <button class="close-btn">×</button>
             <div class="meta">Voice: ${char.assigned_voice_id}</div>
@@ -220,7 +218,7 @@ function renderCharacterCards(data) {
             <button class="chat-btn">Talk to ${char.name}</button>
         `;
 
-        // 2. Attach the "Talk" logic safely using JavaScript
+        // "Talk" logic safely using JavaScript
         // This method handles apostrophes, quotes, and newlines automatically.
         const chatBtn = card.querySelector('.chat-btn');
             
@@ -234,7 +232,7 @@ function renderCharacterCards(data) {
             );
         });
 
-        // 3. Attach the "Close" logic
+        // the "Close" logic
         card.querySelector('.close-btn').addEventListener('click', window.endChat);
 
         grid.appendChild(card);
@@ -244,16 +242,16 @@ function renderCharacterCards(data) {
 function formatTitle(filename) {
     if (!filename) return "Unknown Book";
     
-    // 1. Remove file extension if present (e.g. .txt)
+    // Remove file extension if present (e.g. .txt)
     let clean = filename.replace(/\.txt$/i, '');
 
     // Remove timestamp if present (e.g. gatsby_173515...)
     clean = clean.replace(/_\d+$/, '');
     
-    // 2. Split by underscores OR hyphens
+    // Split by underscores OR hyphens
     let words = clean.split(/[_-]/);
     
-    // 3. Capitalize first letter of each word and join them
+    // Capitalize first letter of each word and join them
     return words.map(word => 
         word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
@@ -271,7 +269,7 @@ async function loadCharacters(filename) {
     try {
         const headers = {}
         if (AUTH_TOKEN) {
-            headers['X-Access-Token'] = AUTH_TOKEN; // <--- Send the key!
+            headers['X-Access-Token'] = AUTH_TOKEN; 
         }
 
         const res = await fetch(`${API_URL}/book/${filename}`, { headers: headers });
@@ -301,7 +299,7 @@ async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
             await conversation.endSession(); 
             conversation = null;
         }
-        // CRITICAL: We return here so we don't accidentally restart the chat below.
+        // We return here so we don't accidentally restart the chat below.
         return; 
     }
 
@@ -319,7 +317,7 @@ async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
     btn.disabled = true;
 
     try {
-        // 1. Get Microphone Access
+        // Get Microphone Access
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
         btn.innerText = "Connecting...";
@@ -373,7 +371,6 @@ async function startChat(btnElement, voiceId, encodedPrompt, encodedName) {
                 conversation = null;
             },
             onModeChange: (mode) => {
-                // Optional: You can see if the AI is 'speaking' or 'listening'
                 if (mode.mode === 'speaking') {
                     card.classList.add('speaking'); // Trigger Pulse CSS
                 } else {
@@ -405,7 +402,7 @@ async function endChat() {
         console.log("X Button clicked. Ending session...");
         await conversation.endSession();
     } else {
-        // Fallback: If stuck on "Connecting..." and conversation is null, force close UI
+        // If stuck on "Connecting..." and conversation is null, force close UI
         document.body.classList.remove('chat-active');
         document.querySelectorAll('.card.active').forEach(c => {
             c.classList.remove('active', 'speaking')
