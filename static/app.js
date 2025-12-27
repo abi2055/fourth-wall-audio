@@ -63,8 +63,6 @@ function startVisualizer(stream, cardElement) {
         }
         const average = sum / dataArray.length;
 
-        console.log("Mic Volume:", average);
-
         // Map Volume to Glow
         const intensity = Math.min(average * 4.0, 60); 
          
