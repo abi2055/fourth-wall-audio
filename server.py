@@ -1,6 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from flask_cors import CORS
-from google.cloud import firestore
+from firebase_admin import firestore, credentials, initialize_app
 import os
 from functools import wraps
 from flask import request
@@ -11,12 +11,27 @@ load_dotenv(override=True)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {
-    "origins": ["http://127.0.0.1:5500", "http://localhost:5500"],  # Allow your frontend
+    "origins": ["http://127.0.0.1:5000", "http://localhost:5000"],  # Allow your frontend
     "allow_headers": ["Content-Type", "Authorization", "X-Access-Token"], # Allow your custom token
     "methods": ["GET", "POST", "OPTIONS"] # Allow these actions
 }})
 
-db = firestore.Client(os.getenv('GOOGLE_CLOUD_PROJECT'))
+if os.path.exists("/etc/secrets/service_account.json"):
+    print("Using service account from /etc/secrets/")
+    cred = credentials.Certificate("/etc/secrets/service_account.json")
+elif os.path.exists("service_account.json"):
+    print("Using service account from local file.")
+    cred = credentials.Certificate("service_account.json")
+else:
+    raise FileNotFoundError("Could not find service_account.json for Firestore authentication.")
+
+try:
+    initialize_app(cred)
+except ValueError:
+    pass
+
+db = firestore.client()
+
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "default_insecure_password")
 print(f" DEBUG: Server is expecting this token: '{ACCESS_TOKEN}'")
 
@@ -30,6 +45,10 @@ def require_token(f):
             return jsonify({"error": "Unauthorized"}), 401
         return f(*args, **kwargs)
     return decorated_function
+
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 @app.route('/book/<book_id>', methods=['GET'])
 @require_token
