@@ -1,8 +1,0 @@
-{
-    "python-envs.pythonProjects": [],
-    "liveServer.settings.ignoreFiles": [
-        "**/*.json",
-        "**/*.txt", 
-        "**/__pycache__/**"
-    ]
-}
