@@ -6,4 +6,4 @@ python-dotenv
 gunicorn
 requests
 elevenlabs
-google-generativeai
+google-genai
