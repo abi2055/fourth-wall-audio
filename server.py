@@ -16,20 +16,30 @@ CORS(app, resources={r"/*": {
     "methods": ["GET", "POST", "OPTIONS"] # Allow these actions
 }})
 
-if os.path.exists("/etc/secrets/service_account.json"):
-    print("Using service account from /etc/secrets/")
-    cred = credentials.Certificate("/etc/secrets/service_account.json")
-elif os.path.exists("service_account.json"):
-    print("Using service account from local file.")
-    cred = credentials.Certificate("service_account.json")
-else:
-    raise FileNotFoundError("Could not find service_account.json for Firestore authentication.")
+def initialize_firestore():
+    if os.path.exists("/etc/secrets/service_account.json"):
+        print("Using service account from /etc/secrets/")
+        cred = credentials.Certificate("/etc/secrets/service_account.json")
+        try:
+            initialize_app(cred)
+        except ValueError:
+            pass
 
-try:
-    initialize_app(cred)
-except ValueError:
-    pass
+    elif os.path.exists("service_account.json"):
+        print("Using service account from local file.")
+        cred = credentials.Certificate("service_account.json")
+        try:
+            initialize_app(cred)
+        except ValueError:
+            pass
+    else:
+        print("Auth: No key file found. Using Google Cloud Default Credentials (ADC).")
+        try:
+            initialize_app() # No arguments = Use Server's Identity
+        except ValueError:
+            pass
 
+initialize_firestore()
 db = firestore.client()
 
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "default_insecure_password")
