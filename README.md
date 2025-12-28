@@ -53,5 +53,37 @@ This project integrates two key partner technologies to solve the problem of sta
 ```bash
 git clone [https://github.com/yourusername/fourth-wall-audio.git](https://github.com/yourusername/fourth-wall-audio.git)
 cd fourth-wall-audio
+```
 
+### 2. Clone the Repository
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# Mac/Linux
+source venv/bin/activate
+```
 
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure Environment Variables
+```bash
+GOOGLE_CLOUD_LOCATION=closest_location
+GOOGLE_CLOUD_PROJECT_NUMBER=your_project_ID
+GOOGLE_CLOUD_PROJECT=your_project_name
+GOOGLE_VERTEX_API_KEY=your_gemini_key_here
+GOOGLE_GENAI_USE_VERTEXAI=True
+ACCESS_TOKEN=your_access_token
+```
+
+### 5. Setup Google Cloud Credentials
+Download your Service Account JSON key from Google Cloud IAM. Save it as service_account.json in the root folder.
+
+### 6. Run the App
+```bash
+python main.py
+```
+Visit http://127.0.0.1:5000 in your browser.
