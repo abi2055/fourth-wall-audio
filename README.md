@@ -98,3 +98,36 @@ Visit http://127.0.0.1:5000 in your browser.
 Ensure Procfile exists: web: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 main:app
 
 Ensure requirements.txt includes gunicorn.
+
+### 2. Deploy via CLI (or connect GitHub in Console)
+```bash
+gcloud run deploy fourth-wall-live \
+  --source . \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --set-env-vars GOOGLE_VERTEX_API_KEY=...,ACCESS_TOKEN=...,GOOGLE_CLOUD_LOCATION=...,GOOGLE_CLOUD_PROJECT_NUMBER=...,GOOGLE_CLOUD_PROJECT=...,GOOGLE_GENAI_USE_VERTEXAI=...
+```
+
+### 3. Scaling Config
+Min Instances: 1 (Prevents cold starts)
+
+Max Instances: 5 (Prevents budget overrun)
+
+---
+
+## Architecture Overview
+1. User uploads a book (.txt).
+2. Flask Server sends a sample to Google Gemini.
+3. Gemini returns a JSON list of characters with "System Prompts" (personalities) and "Voice IDs".
+4. Backend caches this data in Firestore to save API costs on future reads.
+5. Frontend displays the cast. When the user clicks "Play", the text is sent to ElevenLabs using the specific character's assigned Voice ID.
+
+---
+
+## Acknowledgements
+Built for the AI Partner Catalyst: Accelerate Innovation Hackathon.
+
+Voices provided by the ElevenLabs Community Library.
+
+LLM reasoning powered by Google DeepMind.
