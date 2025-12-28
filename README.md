@@ -11,7 +11,7 @@
 
 Submitted for the **AI Partner Catalyst: Accelerate Innovation Hackathon**, this project directly addresses the **ElevenLabs & Google Cloud** challenge to "make apps conversational."
 
-Instead of a single narrator reading a book, Fourth Wall Audio uses **Google Gemini** to analyze the story, identify unique characters, and understand their personalities. It then "casts" these characters using **ElevenLabs'** advanced voice synthesis, assigning a unique, emotionally resonant voice to each role. The result is an audiobook that feels like a radio drama, generated on the fly.
+Instead of a single narrator reading a book, Fourth Wall Audio uses **Google Gemini** to analyze the story, identify unique characters, and understand their personalities. It then "casts" these characters using **ElevenLabs'** advanced voice synthesis, assigning a unique, emotionally resonant voice to each role. The result is a lifelike performance that transforms flat, 2D text into a fully 3D immersive experience, generated on the fly.
 
 ---
 
@@ -53,4 +53,5 @@ This project integrates two key partner technologies to solve the problem of sta
 ```bash
 git clone [https://github.com/yourusername/fourth-wall-audio.git](https://github.com/yourusername/fourth-wall-audio.git)
 cd fourth-wall-audio
+
 
