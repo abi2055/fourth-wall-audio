@@ -80,10 +80,21 @@ ACCESS_TOKEN=your_access_token
 ```
 
 ### 5. Setup Google Cloud Credentials
-Download your Service Account JSON key from Google Cloud IAM. Save it as service_account.json in the root folder.
+Download your Service Account JSON key from Google Cloud IAM
+
+Save it as service_account.json in the root folder.
 
 ### 6. Run the App
 ```bash
 python main.py
 ```
 Visit http://127.0.0.1:5000 in your browser.
+
+---
+
+## Deployment (Google Cloud Run)
+
+### 1. Prepare for Cloud
+Ensure Procfile exists: web: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 main:app
+
+Ensure requirements.txt includes gunicorn.
