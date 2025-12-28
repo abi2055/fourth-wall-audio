@@ -6,6 +6,8 @@
 [![Google Gemini](https://img.shields.io/badge/AI-Google_Gemini-4285F4?style=flat&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
 [![ElevenLabs](https://img.shields.io/badge/Audio-ElevenLabs-black?style=flat)](https://elevenlabs.io/)
 
+> **Note:** The live demo requires an **Access Key** to prevent unauthorized API usage. Judges can find the access key in the submission details or use the specific "Judge Link" provided there.
+
 ## About
 **Fourth Wall Audio** transforms standard text files into immersive, full-cast audio productions instantly.
 
@@ -131,3 +133,4 @@ Built for the AI Partner Catalyst: Accelerate Innovation Hackathon.
 Voices provided by the ElevenLabs Community Library.
 
 LLM reasoning powered by Google DeepMind.
+
