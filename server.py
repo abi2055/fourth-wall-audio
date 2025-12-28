@@ -11,7 +11,7 @@ load_dotenv(override=True)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {
-    "origins": ["http://127.0.0.1:5000", "http://localhost:5000"],  # Allow your frontend
+    "origins": "*",  # Allow your frontend
     "allow_headers": ["Content-Type", "Authorization", "X-Access-Token"], # Allow your custom token
     "methods": ["GET", "POST", "OPTIONS"] # Allow these actions
 }})

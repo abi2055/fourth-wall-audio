@@ -1,6 +1,6 @@
 import { Conversation } from '@elevenlabs/client'
 
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "";
 const AGENT_ID = "agent_9401kcq42qc0e4a8ys3pnty630rb";
 
 window.loadCharacters = loadCharacters
