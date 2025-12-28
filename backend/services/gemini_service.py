@@ -5,13 +5,11 @@ import json
 import time
 import os
 from dotenv import load_dotenv
-from google.cloud import firestore
+from firebase_admin import firestore
 
 load_dotenv(override=True)
 
-client = genai.Client()
-
-db = firestore.Client(project=os.getenv("GOOGLE_CLOUD_PROJECT"))
+client = genai.Client(api_key=os.getenv("GOOGLE_VERTEX_API_KEY"))
 
 VOICE_ARCHETYPES = [
     {"id": "2mltbVQP21Fq8XgIfRQJ", "type": "Axell (Young/Energetic)", "desc": "Young, Confident, Energetic, Male, British"}, 
@@ -38,6 +36,7 @@ VOICE_ARCHETYPES = [
 # 10. Suspensful, dark, steady, british woman voice -> voice ID: GsjQ0ydx7QzhDLqInGtT
 
 def save_book_to_db(book_title, characters_data, book_text):
+    db = firestore.client()
     doc_ref = db.collection("books").document(book_title)
     doc_ref.set({
         "book_title": book_title,
@@ -47,6 +46,7 @@ def save_book_to_db(book_title, characters_data, book_text):
     print(f"Book '{book_title}' saved to Firestore.")
 
 def extract_characters(book_filename, book_text):
+    db = firestore.client()
 
     base_book_title = os.path.splitext(book_filename)[0]
 
