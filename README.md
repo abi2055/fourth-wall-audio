@@ -120,7 +120,7 @@ Max Instances: 5 (Prevents budget overrun)
 ---
 
 ## Video Demonstration 
-[![Watch the demo](assets/demo.png)](https://www.youtube.com/watch?v=1tzQgOkMIsY)
+[![Watch the demo](static/assets/new_thumbnail.png)](https://www.youtube.com/watch?v=1tzQgOkMIsY)
 
 ---
 
@@ -139,6 +139,7 @@ Built for the AI Partner Catalyst: Accelerate Innovation Hackathon.
 Voices provided by the ElevenLabs Community Library.
 
 LLM reasoning powered by Google DeepMind.
+
 
 
 
