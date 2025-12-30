@@ -1,7 +1,7 @@
 # Fourth Wall Audio
 > **Interactive Audiobooks Powered by AI**
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Click_Here-FF5722?style=for-the-badge&logo=google-cloud)](https://bit.ly/fourth-wall-app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Click_Here-FF5722?style=for-the-badge&logo=google-cloud)](https://fourth-wall-audio-631887658874.us-central1.run.app/)
 [![Video Demo](https://img.shields.io/badge/Video_Demo-Watch-red?style=for-the-badge&logo=youtube)](https://youtu.be/1tzQgOkMIsY)
 [![Hackathon](https://img.shields.io/badge/Submission-AI_Partner_Catalyst-blue?style=flat)](https://ai-partner-catalyst.devpost.com/)
 [![Google Gemini](https://img.shields.io/badge/AI-Google_Gemini-4285F4?style=flat&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
@@ -119,6 +119,11 @@ Max Instances: 5 (Prevents budget overrun)
 
 ---
 
+## Video Demonstration 
+[![Watch the demo](assets/demo.png)](https://www.youtube.com/watch?v=1tzQgOkMIsY)
+
+---
+
 ## Architecture Overview
 1. User uploads a book (.txt).
 2. Flask Server sends a sample to Google Gemini.
@@ -134,6 +139,7 @@ Built for the AI Partner Catalyst: Accelerate Innovation Hackathon.
 Voices provided by the ElevenLabs Community Library.
 
 LLM reasoning powered by Google DeepMind.
+
 
 
 
